@@ -1,0 +1,167 @@
+IMPORTANT PRODUCT RESET
+
+STOP continuing the previous dashboard-heavy GolPatrón architecture.
+
+The product direction has COMPLETELY changed.
+
+GolPatrón is NO LONGER:
+
+a tactical football dashboard
+a football analytics console
+a scout platform
+a telemetry-heavy sports terminal
+an admin-style football system
+
+DO NOT continue:
+dashboard layouts,
+dense data grids,
+analytics-heavy structures,
+or complex football control-center UI.
+
+GolPatrón is now:
+
+“A minimal, premium, realtime FIFA Mundial social companion app.”
+
+The experience should feel like:
+
+Apple Sports
+OneFootball
+TikTok football energy
+Discord supporter communities
+modern sports-media UX
+
+NOT:
+Bloomberg football terminal.
+
+The app must feel:
+
+clean
+minimal
+emotional
+fast
+social
+immersive
+mobile-first
+
+The user should instantly feel:
+live football energy,
+NOT data overload.
+
+The app is now focused ONLY on:
+
+live Mundial matches
+supporter rooms
+realtime predictions
+rankings
+football social energy
+
+NOT:
+deep tactical systems.
+
+ONLY keep:
+
+Home
+Fan Rooms
+Predictions
+Schedule
+Player Rankings
+Profile
+
+REMOVE or HIDE:
+
+scout systems
+tactical dashboards
+telemetry screens
+admin complexity
+analytics-heavy pages
+unnecessary tabs
+
+The homepage should feel:
+minimal and alive.
+
+Structure:
+
+one hero live match
+horizontal live matches ribbon
+flash football news
+countdowns
+premium sponsor strip
+
+Avoid:
+stacked dashboard widgets.
+
+This is the MOST IMPORTANT retention feature.
+
+Use:
+large circular supporter room bubbles.
+
+Examples:
+🇲🇽 Mexico
+🇦🇷 Argentina
+🇧🇷 Brazil
+🇫🇷 France
+
+Rooms should feel:
+
+emotional
+premium
+social
+breathable
+immersive
+
+Avoid:
+crowded chat layouts.
+
+Predictions must remain:
+LIVE THROUGHOUT MATCHES.
+
+Examples:
+
+who scores next
+final score
+MVP
+next yellow card
+
+Fast, addictive, lightweight.
+
+IMPORTANT:
+The app must NOT feel like a dashboard.
+
+Avoid:
+
+dense data cards
+admin layouts
+telemetry grids
+oversized stat blocks
+complex analytics
+
+Instead prioritize:
+
+whitespace
+visual hierarchy
+emotional football moments
+fast scrolling
+clean typography
+mobile fluidity
+
+The app should feel:
+like a premium World Cup social platform.
+
+Think:
+modern sports-media app,
+NOT enterprise football software.
+
+Every screen should answer:
+“Does this feel fast, emotional, and social?”
+
+If not:
+simplify it.
+
+GolPatrón should feel like:
+a clean, addictive World Cup companion app that football fans open constantly during matches for:
+
+live football emotion
+supporter communities
+realtime predictions
+football culture
+social engagement.
