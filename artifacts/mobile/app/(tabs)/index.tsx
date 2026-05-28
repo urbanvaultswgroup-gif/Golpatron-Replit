@@ -57,21 +57,21 @@ export default function HomeScreen() {
   const { data: liveData, isLoading: loadingLive, refetch: refetchLive } = useQuery({
     queryKey: ["football-live"],
     queryFn: footballApi.getLive,
-    refetchInterval: 30_000,
+    refetchInterval: 45_000,
     retry: 1,
   });
 
   const { data: newsData, refetch: refetchNews } = useQuery({
     queryKey: ["football-news"],
     queryFn: footballApi.getNews,
-    refetchInterval: 60_000,
+    refetchInterval: 2 * 3_600_000,
     retry: 1,
   });
 
   const { data: fixturesData } = useQuery({
     queryKey: ["football-fixtures"],
     queryFn: footballApi.getFixtures,
-    refetchInterval: 120_000,
+    refetchInterval: 30 * 60_000,
     retry: 1,
   });
 

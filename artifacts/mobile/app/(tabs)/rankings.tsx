@@ -51,7 +51,7 @@ export default function RankingsScreen() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["football-topscorers"],
     queryFn: footballApi.getTopScorers,
-    refetchInterval: 120_000,
+    refetchInterval: 6 * 3_600_000,
     retry: 1,
   });
 
