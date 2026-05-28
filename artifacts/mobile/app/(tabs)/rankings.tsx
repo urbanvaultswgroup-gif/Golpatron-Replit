@@ -1,8 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,31 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-
-interface Player {
-  id: string;
-  name: string;
-  country: string;
-  countryCode: string;
-  teamColor: string;
-  goals: number;
-  assists: number;
-  rating: number;
-  avatar: string;
-}
-
-const PLAYERS: Player[] = [
-  { id: "1", name: "Kylian Mbappe", country: "France", countryCode: "FRA", teamColor: "#002395", goals: 8, assists: 3, rating: 9.4, avatar: "K" },
-  { id: "2", name: "Cristiano Ronaldo", country: "Portugal", countryCode: "POR", teamColor: "#006600", goals: 6, assists: 1, rating: 8.8, avatar: "C" },
-  { id: "3", name: "Lionel Messi", country: "Argentina", countryCode: "ARG", teamColor: "#74ACDF", goals: 6, assists: 5, rating: 9.2, avatar: "L" },
-  { id: "4", name: "Vinicius Jr", country: "Brazil", countryCode: "BRA", teamColor: "#009C3B", goals: 5, assists: 4, rating: 8.7, avatar: "V" },
-  { id: "5", name: "Harry Kane", country: "England", countryCode: "ENG", teamColor: "#C8102E", goals: 4, assists: 2, rating: 8.1, avatar: "H" },
-  { id: "6", name: "Alvaro Morata", country: "Spain", countryCode: "ESP", teamColor: "#AA151B", goals: 4, assists: 1, rating: 7.9, avatar: "A" },
-  { id: "7", name: "Lautaro Martinez", country: "Argentina", countryCode: "ARG", teamColor: "#74ACDF", goals: 3, assists: 2, rating: 8.0, avatar: "L" },
-  { id: "8", name: "Richarlison", country: "Brazil", countryCode: "BRA", teamColor: "#009C3B", goals: 3, assists: 1, rating: 7.7, avatar: "R" },
-  { id: "9", name: "Antoine Griezmann", country: "France", countryCode: "FRA", teamColor: "#002395", goals: 2, assists: 6, rating: 8.3, avatar: "A" },
-  { id: "10", name: "Jude Bellingham", country: "England", countryCode: "ENG", teamColor: "#C8102E", goals: 2, assists: 3, rating: 8.5, avatar: "J" },
-];
+import { footballApi, type TopScorer } from "@/services/footballApi";
 
 type Metric = "goals" | "assists" | "rating";
 
@@ -51,6 +30,17 @@ function getRankColor(rank: number, colors: ReturnType<typeof useColors>) {
   return colors.mutedForeground;
 }
 
+function getValue(p: TopScorer, metric: Metric): string {
+  if (metric === "goals") return `${p.goals}`;
+  if (metric === "assists") return `${p.assists}`;
+  return p.rating.toFixed(1);
+}
+
+function getInitial(name: string): string {
+  const parts = name.split(" ");
+  return parts[parts.length - 1]?.[0] ?? name[0] ?? "?";
+}
+
 export default function RankingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -58,70 +48,56 @@ export default function RankingsScreen() {
   const topPad = isWeb ? 67 : insets.top;
   const [metric, setMetric] = useState<Metric>("goals");
 
-  const sorted = [...PLAYERS].sort((a, b) => b[metric] - a[metric]);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["football-topscorers"],
+    queryFn: footballApi.getTopScorers,
+    refetchInterval: 120_000,
+    retry: 1,
+  });
+
+  const players: TopScorer[] = data?.topscorers ?? [];
+  const isLive = data?.source === "live";
+
+  const sorted = [...players].sort((a, b) => {
+    if (metric === "goals") return b.goals - a.goals;
+    if (metric === "assists") return b.assists - a.assists;
+    return b.rating - a.rating;
+  }).map((p, i) => ({ ...p, rank: i + 1 }));
 
   const topThree = sorted.slice(0, 3);
   const rest = sorted.slice(3);
-
-  const getValue = (p: Player) => {
-    if (metric === "goals") return `${p.goals} G`;
-    if (metric === "assists") return `${p.assists} A`;
-    return p.rating.toFixed(1);
-  };
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.primary} />
+        }
         contentContainerStyle={{ paddingBottom: isWeb ? 120 : 100 }}
       >
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-          <Text style={[styles.headerTitle, { color: colors.foreground }]}>
-            Rankings
-          </Text>
-          <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-            Mundial 2026
-          </Text>
+          <View>
+            <Text style={[styles.headerTitle, { color: colors.foreground }]}>Rankings</Text>
+            <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
+              Mundial 2026{!isLive ? " · Demo" : ""}
+            </Text>
+          </View>
+          {isLoading && <ActivityIndicator color={colors.primary} />}
         </View>
 
         {/* Metric selector */}
-        <View
-          style={[
-            styles.metricRow,
-            { backgroundColor: colors.card },
-          ]}
-        >
+        <View style={[styles.metricRow, { backgroundColor: colors.card }]}>
           {METRICS.map((m) => {
             const active = metric === m.key;
             return (
               <Pressable
                 key={m.key}
                 onPress={() => setMetric(m.key)}
-                style={[
-                  styles.metricBtn,
-                  {
-                    backgroundColor: active
-                      ? colors.primary
-                      : "transparent",
-                  },
-                ]}
+                style={[styles.metricBtn, { backgroundColor: active ? colors.primary : "transparent" }]}
               >
-                <Ionicons
-                  name={m.icon as any}
-                  size={14}
-                  color={active ? "#000" : colors.mutedForeground}
-                />
-                <Text
-                  style={[
-                    styles.metricLabel,
-                    {
-                      color: active ? "#000" : colors.mutedForeground,
-                      fontFamily: active
-                        ? "Inter_700Bold"
-                        : "Inter_400Regular",
-                    },
-                  ]}
-                >
+                <Ionicons name={m.icon as any} size={14} color={active ? colors.primaryForeground : colors.mutedForeground} />
+                <Text style={[styles.metricLabel, { color: active ? colors.primaryForeground : colors.mutedForeground, fontFamily: active ? "Inter_700Bold" : "Inter_400Regular" }]}>
                   {m.label}
                 </Text>
               </Pressable>
@@ -130,124 +106,70 @@ export default function RankingsScreen() {
         </View>
 
         {/* Podium */}
-        <View style={styles.podium}>
-          {[topThree[1], topThree[0], topThree[2]].map((p, podiumIdx) => {
-            if (!p) return null;
-            const realRank =
-              podiumIdx === 0 ? 2 : podiumIdx === 1 ? 1 : 3;
-            const heights = [120, 148, 104];
-            const podHeight = heights[podiumIdx];
-            const rankColor = getRankColor(realRank, colors);
-            return (
-              <View key={p.id} style={styles.podiumSlot}>
-                <View
-                  style={[
-                    styles.podiumAvatar,
-                    {
-                      backgroundColor: p.teamColor,
-                      borderColor: rankColor,
-                      borderWidth: realRank === 1 ? 2 : 1,
-                    },
-                  ]}
-                >
-                  <Text style={styles.podiumAvatarLetter}>{p.avatar}</Text>
-                </View>
-                <Text
-                  style={[
-                    styles.podiumName,
-                    { color: colors.foreground },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {p.name.split(" ").slice(-1)[0]}
-                </Text>
-                <Text
-                  style={[
-                    styles.podiumVal,
-                    { color: rankColor },
-                  ]}
-                >
-                  {getValue(p)}
-                </Text>
-                <View
-                  style={[
-                    styles.podiumBlock,
-                    {
-                      height: podHeight,
-                      backgroundColor:
-                        realRank === 1
-                          ? colors.gold + "33"
-                          : colors.card,
-                      borderTopColor: rankColor,
-                      borderTopWidth: 2,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.podiumRank, { color: rankColor }]}>
-                    {realRank}
+        {topThree.length >= 3 && (
+          <View style={styles.podium}>
+            {[topThree[1], topThree[0], topThree[2]].map((p, podiumIdx) => {
+              if (!p) return null;
+              const realRank = podiumIdx === 0 ? 2 : podiumIdx === 1 ? 1 : 3;
+              const heights = [120, 148, 104];
+              const podHeight = heights[podiumIdx];
+              const rankColor = getRankColor(realRank, colors);
+              const initial = getInitial(p.name);
+              return (
+                <View key={p.name} style={styles.podiumSlot}>
+                  <View style={[styles.podiumAvatar, { backgroundColor: p.teamColor, borderColor: rankColor, borderWidth: realRank === 1 ? 2 : 1 }]}>
+                    <Text style={styles.podiumAvatarLetter}>{initial}</Text>
+                  </View>
+                  <Text style={[styles.podiumName, { color: colors.foreground }]} numberOfLines={1}>
+                    {p.name.split(" ").slice(-1)[0]}
                   </Text>
+                  <Text style={[styles.podiumVal, { color: rankColor }]}>
+                    {getValue(p, metric)} {metric === "goals" ? "G" : metric === "assists" ? "A" : ""}
+                  </Text>
+                  <View style={[styles.podiumBlock, { height: podHeight, backgroundColor: realRank === 1 ? colors.gold + "22" : colors.card, borderTopColor: rankColor, borderTopWidth: 2 }]}>
+                    <Text style={[styles.podiumRank, { color: rankColor }]}>{realRank}</Text>
+                  </View>
                 </View>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Rest of list */}
+        <View style={styles.list}>
+          {rest.map((p, idx) => {
+            const rankColor = getRankColor(p.rank, colors);
+            const initial = getInitial(p.name);
+            return (
+              <View
+                key={p.name + idx}
+                style={[styles.listRow, { borderBottomColor: colors.border, borderBottomWidth: idx < rest.length - 1 ? 1 : 0 }]}
+              >
+                <Text style={[styles.listRank, { color: rankColor, width: 28 }]}>{p.rank}</Text>
+                <View style={[styles.listAvatar, { backgroundColor: p.teamColor }]}>
+                  <Text style={styles.listAvatarLetter}>{initial}</Text>
+                </View>
+                <View style={styles.listInfo}>
+                  <Text style={[styles.listName, { color: colors.foreground }]}>{p.name}</Text>
+                  <Text style={[styles.listCountry, { color: colors.mutedForeground }]}>{p.country}</Text>
+                </View>
+                <Text style={[styles.listVal, { color: colors.primary }]}>
+                  {getValue(p, metric)}{" "}
+                  <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
+                    {metric === "goals" ? "G" : metric === "assists" ? "A" : ""}
+                  </Text>
+                </Text>
               </View>
             );
           })}
         </View>
 
-        {/* Rest of the list */}
-        <View style={styles.list}>
-          {rest.map((p, idx) => {
-            const rank = idx + 4;
-            const rankColor = getRankColor(rank, colors);
-            return (
-              <View
-                key={p.id}
-                style={[
-                  styles.listRow,
-                  {
-                    borderBottomColor: colors.border,
-                    borderBottomWidth: idx < rest.length - 1 ? 1 : 0,
-                  },
-                ]}
-              >
-                <Text
-                  style={[styles.listRank, { color: rankColor, width: 28 }]}
-                >
-                  {rank}
-                </Text>
-                <View
-                  style={[
-                    styles.listAvatar,
-                    { backgroundColor: p.teamColor },
-                  ]}
-                >
-                  <Text style={styles.listAvatarLetter}>{p.avatar}</Text>
-                </View>
-                <View style={styles.listInfo}>
-                  <Text
-                    style={[styles.listName, { color: colors.foreground }]}
-                  >
-                    {p.name}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.listCountry,
-                      { color: colors.mutedForeground },
-                    ]}
-                  >
-                    {p.countryCode}
-                  </Text>
-                </View>
-                <Text
-                  style={[
-                    styles.listVal,
-                    { color: colors.primary },
-                  ]}
-                >
-                  {getValue(p)}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+        {isLoading && players.length === 0 && (
+          <View style={styles.loadingCenter}>
+            <ActivityIndicator color={colors.primary} size="large" />
+            <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>Loading rankings…</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -255,122 +177,29 @@ export default function RankingsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 28,
-    letterSpacing: -0.5,
-  },
-  headerSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    marginTop: 4,
-  },
-  metricRow: {
-    marginHorizontal: 20,
-    borderRadius: 12,
-    flexDirection: "row",
-    padding: 4,
-    marginBottom: 28,
-  },
-  metricBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 9,
-  },
-  metricLabel: {
-    fontSize: 13,
-  },
-  podium: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    paddingHorizontal: 20,
-    marginBottom: 28,
-    gap: 4,
-  },
-  podiumSlot: {
-    flex: 1,
-    alignItems: "center",
-  },
-  podiumAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  podiumAvatarLetter: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: "#FFFFFF",
-  },
-  podiumName: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    marginBottom: 2,
-    textAlign: "center",
-  },
-  podiumVal: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    marginBottom: 6,
-  },
-  podiumBlock: {
-    width: "100%",
-    borderRadius: 8,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingTop: 10,
-  },
-  podiumRank: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 20,
-  },
-  list: {
-    paddingHorizontal: 20,
-  },
-  listRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    gap: 12,
-  },
-  listRank: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-  },
-  listAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  listAvatarLetter: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    color: "#FFFFFF",
-  },
+  header: { paddingHorizontal: 20, paddingBottom: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  headerTitle: { fontFamily: "Inter_700Bold", fontSize: 28, letterSpacing: -0.5 },
+  headerSub: { fontFamily: "Inter_400Regular", fontSize: 14, marginTop: 4 },
+  metricRow: { marginHorizontal: 20, borderRadius: 12, flexDirection: "row", padding: 4, marginBottom: 28 },
+  metricBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10, borderRadius: 9 },
+  metricLabel: { fontSize: 13 },
+  podium: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20, marginBottom: 28, gap: 4 },
+  podiumSlot: { flex: 1, alignItems: "center" },
+  podiumAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center", marginBottom: 6 },
+  podiumAvatarLetter: { fontFamily: "Inter_700Bold", fontSize: 18, color: "#FFFFFF" },
+  podiumName: { fontFamily: "Inter_600SemiBold", fontSize: 11, marginBottom: 2, textAlign: "center" },
+  podiumVal: { fontFamily: "Inter_700Bold", fontSize: 14, marginBottom: 6 },
+  podiumBlock: { width: "100%", borderRadius: 8, justifyContent: "flex-start", alignItems: "center", paddingTop: 10 },
+  podiumRank: { fontFamily: "Inter_700Bold", fontSize: 20 },
+  list: { paddingHorizontal: 20 },
+  listRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14, gap: 12 },
+  listRank: { fontFamily: "Inter_700Bold", fontSize: 14 },
+  listAvatar: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
+  listAvatarLetter: { fontFamily: "Inter_700Bold", fontSize: 14, color: "#FFFFFF" },
   listInfo: { flex: 1 },
-  listName: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-  },
-  listCountry: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    marginTop: 1,
-  },
-  listVal: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
-  },
+  listName: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
+  listCountry: { fontFamily: "Inter_400Regular", fontSize: 11, marginTop: 1 },
+  listVal: { fontFamily: "Inter_700Bold", fontSize: 16 },
+  loadingCenter: { alignItems: "center", paddingVertical: 60, gap: 12 },
+  loadingText: { fontFamily: "Inter_400Regular", fontSize: 14 },
 });
