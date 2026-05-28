@@ -1,0 +1,159 @@
+================================================== CURRENT FOUNDATION STATUS
+
+GolPatrón is now entering FINAL MVP HARDENING phase for Mundial launch.
+
+IMPORTANT:
+Do NOT add major new systems or dashboard complexity.
+
+The platform direction is now:
+a minimal, premium, realtime World Cup social companion app.
+
+The following infrastructure is already working:
+
+API proxy layer
+football API integration
+fallback mock data
+realtime refresh
+mobile fetch architecture
+live match rendering
+rankings feed
+flash news system
+
+DO NOT rebuild this architecture.
+
+Refine and optimize it.
+
+Transform the app into:
+a stable, fast, emotionally immersive Mundial companion experience optimized for:
+
+mobile users
+realtime engagement
+supporter retention
+football emotion
+
+==================================================
+
+FIRESTORE CACHE LAYER
+==================================================
+
+CRITICAL:
+Do NOT allow every client to directly trigger API refreshes.
+
+Implement:
+centralized Firestore cache architecture.
+
+Required flow:
+
+API-Football
+↓
+Firebase Functions
+↓
+Firestore cache
+↓
+All clients consume shared cached data
+
+This prevents:
+API quota destruction during beta.
+
+Reduce unnecessary polling.
+
+Required intervals:
+
+LIVE matches:
+30–60 seconds
+
+Fixtures:
+30 minutes
+
+Rankings:
+6 hours
+
+News:
+1–2 hours
+
+Only live matches should refresh aggressively.
+
+Maintain:
+smart fallback system.
+
+If API quota exhausted:
+
+gracefully fallback
+preserve football atmosphere
+preserve app continuity
+
+The app should NEVER feel:
+dead or broken.
+
+Supporter rooms are now:
+the core retention feature.
+
+Refactor them into:
+clean football lounges.
+
+Requirements:
+
+large circular room bubbles
+compact emotional reactions
+lightweight message flow
+premium spacing
+mobile-first interactions
+
+Avoid:
+spam-wall chat behavior.
+
+Predictions are now:
+the primary engagement loop.
+
+Requirements:
+
+predictions active throughout matches
+realtime updates
+lock timers
+live XP scoring
+leaderboard synchronization
+
+Prediction flow must feel:
+fast and addictive.
+
+Implement Firebase Cloud Messaging for:
+
+goal alerts
+kickoff reminders
+prediction reminders
+room activity
+knockout match alerts
+
+Notifications should feel:
+fast and exciting,
+NOT spammy.
+
+The app should NO LONGER feel:
+like a football analytics platform.
+
+Avoid:
+
+telemetry layouts
+dense stats grids
+admin visuals
+enterprise structures
+
+Prioritize:
+
+football emotion
+clean hierarchy
+social energy
+premium mobile feel
+
+GolPatrón should feel like:
+a premium realtime World Cup social companion app that users open constantly during Mundial matches for:
+
+football emotion
+supporter tribes
+live predictions
+rankings
+realtime reactions
+immersive football culture.
+
+Focus on:
+speed, simplicity, immersion, and retention.

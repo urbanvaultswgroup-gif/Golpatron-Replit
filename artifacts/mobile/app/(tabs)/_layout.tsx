@@ -103,9 +103,9 @@ function ClassicTabLayout() {
           title: "Predict",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="chart.bar" tintColor={color} size={24} />
+              <SymbolView name="bolt" tintColor={color} size={24} />
             ) : (
-              <Ionicons name="analytics-outline" size={22} color={color} />
+              <Ionicons name="flash-outline" size={22} color={color} />
             ),
         }}
       />
