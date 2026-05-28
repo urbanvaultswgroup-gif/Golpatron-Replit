@@ -3,7 +3,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
 import {
-  Dimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -18,64 +17,79 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { LiveBadge } from "@/components/LiveBadge";
 
-const { width } = Dimensions.get("window");
-const BUBBLE_SIZE = (width - 60) / 2;
+const FEATURED_MATCH = {
+  home: "MEX",
+  away: "ARG",
+  homeScore: 1,
+  awayScore: 1,
+  minute: 72,
+  stage: "Quarter-Final",
+  homeColor: "#006847",
+  awayColor: "#4B9CD3",
+};
 
 const ROOMS = [
   {
     id: "1",
-    country: "Brazil",
-    code: "BRA",
-    colors: ["#009C3B", "#FEDF00"] as [string, string],
-    online: 7843,
+    country: "Mexico",
+    code: "MEX",
+    colors: ["#006847", "#CE1126"] as [string, string],
+    online: 12443,
     live: true,
-    message: "GOOOAL! Vinicius Jr fires it home!",
+    message: "GOOOAL! Chucky equalizes — el tri is ALIVE!",
+    vibe: "ELECTRIC",
   },
   {
     id: "2",
     country: "Argentina",
     code: "ARG",
-    colors: ["#74ACDF", "#FFFFFF"] as [string, string],
-    online: 5104,
+    colors: ["#4B9CD3", "#FFFFFF"] as [string, string],
+    online: 9104,
     live: true,
-    message: "Messi is literally everywhere tonight",
+    message: "Messi playing out of his mind, this man is built different",
+    vibe: "HYPE",
   },
   {
     id: "3",
-    country: "France",
-    code: "FRA",
-    colors: ["#002395", "#ED2939"] as [string, string],
-    online: 3208,
-    live: true,
-    message: "Mbappe hat-trick incoming??",
+    country: "Brazil",
+    code: "BRA",
+    colors: ["#009C3B", "#FEDF00"] as [string, string],
+    online: 7843,
+    live: false,
+    message: "Next match in 1h 48m – canarinho já ta preparado",
+    vibe: "READY",
   },
   {
     id: "4",
-    country: "Mexico",
-    code: "MEX",
-    colors: ["#006847", "#CE1126"] as [string, string],
-    online: 2411,
-    live: false,
-    message: "Next match in 2h 34m - LET'S GO",
+    country: "France",
+    code: "FRA",
+    colors: ["#0055A4", "#ED2939"] as [string, string],
+    online: 6208,
+    live: true,
+    message: "Mbappe hat-trick incoming??",
+    vibe: "DOMINANT",
   },
   {
     id: "5",
     country: "England",
     code: "ENG",
-    colors: ["#C8102E", "#00247D"] as [string, string],
-    online: 2904,
+    colors: ["#CF091D", "#00247D"] as [string, string],
+    online: 4904,
     live: true,
-    message: "Kane needs one more to equal record",
+    message: "Kane needs one more to equal the all-time record",
+    vibe: "TENSE",
   },
   {
     id: "6",
     country: "Spain",
     code: "ESP",
-    colors: ["#AA151B", "#F1BF00"] as [string, string],
-    online: 4182,
+    colors: ["#C60B1E", "#F1BF00"] as [string, string],
+    online: 5182,
     live: true,
-    message: "Pedri controlling midfield completely",
+    message: "Pedri absolutely controlling midfield — poetry",
+    vibe: "SMOOTH",
   },
   {
     id: "7",
@@ -83,17 +97,19 @@ const ROOMS = [
     code: "POR",
     colors: ["#006600", "#FF0000"] as [string, string],
     online: 3671,
-    live: true,
-    message: "1-1 with 12 min to go... hold your breath",
+    live: false,
+    message: "Ronaldo dropped from starting XI — massive news",
+    vibe: "DEBATE",
   },
   {
     id: "8",
     country: "Germany",
     code: "GER",
-    colors: ["#000000", "#DD0000"] as [string, string],
+    colors: ["#DD0000", "#FFCE00"] as [string, string],
     online: 2887,
     live: true,
-    message: "Tactical masterclass in the making",
+    message: "Tactical masterclass from Nagelsmann",
+    vibe: "PRECISE",
   },
 ];
 
@@ -102,13 +118,16 @@ function formatOnline(n: number) {
   return n.toString();
 }
 
-function RoomBubble({
+function RoomRow({
   room,
   onPress,
+  active,
 }: {
   room: (typeof ROOMS)[0];
   onPress: () => void;
+  active: boolean;
 }) {
+  const colors = useColors();
   const scale = useSharedValue(1);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -116,39 +135,80 @@ function RoomBubble({
   }));
 
   const handlePress = () => {
-    scale.value = withSpring(0.95, { damping: 12 });
+    scale.value = withSpring(0.97, { damping: 15 });
     setTimeout(() => {
-      scale.value = withSpring(1, { damping: 12 });
+      scale.value = withSpring(1, { damping: 15 });
     }, 100);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   };
 
   return (
-    <Pressable onPress={handlePress} style={styles.bubbleWrapper}>
-      <Animated.View style={[styles.bubbleOuter, animStyle]}>
+    <Pressable onPress={handlePress}>
+      <Animated.View
+        style={[
+          styles.roomRow,
+          animStyle,
+          {
+            backgroundColor: active ? colors.secondary : colors.card,
+            borderColor: active ? colors.primary : colors.border,
+            borderWidth: active ? 1.5 : 1,
+          },
+        ]}
+      >
+        {/* Team color strip */}
         <LinearGradient
-          colors={[...room.colors, room.colors[0] + "88"] as [string, string, string]}
-          style={styles.bubbleGradient}
+          colors={room.colors}
+          style={styles.colorStrip}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <View style={styles.bubbleInner}>
-            {room.live && (
-              <View style={styles.livePip}>
-                <View style={styles.livePipDot} />
-              </View>
-            )}
-            <Text style={styles.bubbleCode}>{room.code}</Text>
-            <Text style={styles.bubbleCountry} numberOfLines={1}>
+          end={{ x: 0, y: 1 }}
+        />
+        {/* Avatar */}
+        <View style={[styles.roomAvatar, { backgroundColor: room.colors[0] }]}>
+          <Text style={styles.roomAvatarText}>{room.code}</Text>
+        </View>
+        {/* Info */}
+        <View style={styles.roomInfo}>
+          <View style={styles.roomInfoTop}>
+            <Text style={[styles.roomName, { color: colors.foreground }]}>
               {room.country}
             </Text>
-            <View style={styles.bubbleOnlineRow}>
-              <Ionicons name="person" size={10} color="rgba(255,255,255,0.8)" />
-              <Text style={styles.bubbleOnline}>{formatOnline(room.online)}</Text>
+            {room.live && <LiveBadge size="sm" />}
+            <View
+              style={[
+                styles.vibeBadge,
+                { backgroundColor: colors.secondary },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.vibeText,
+                  { color: colors.mutedForeground },
+                ]}
+              >
+                {room.vibe}
+              </Text>
             </View>
           </View>
-        </LinearGradient>
+          <Text
+            style={[styles.roomMessage, { color: colors.mutedForeground }]}
+            numberOfLines={1}
+          >
+            {room.message}
+          </Text>
+        </View>
+        {/* Online count */}
+        <View style={styles.roomOnlineBlock}>
+          <Ionicons name="person" size={11} color={colors.mutedForeground} />
+          <Text style={[styles.roomOnline, { color: colors.mutedForeground }]}>
+            {formatOnline(room.online)}
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={14}
+            color={colors.mutedForeground}
+          />
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -159,7 +219,7 @@ export default function RoomsScreen() {
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
-  const [activeRoom, setActiveRoom] = useState<(typeof ROOMS)[0] | null>(null);
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -167,6 +227,7 @@ export default function RoomsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: isWeb ? 120 : 100 }}
       >
+        {/* Header */}
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>
             Fan Rooms
@@ -176,95 +237,104 @@ export default function RoomsScreen() {
           </Text>
         </View>
 
-        {/* Active room preview */}
-        {activeRoom && (
-          <Pressable
-            onPress={() => setActiveRoom(null)}
-            style={[
-              styles.activeRoomBanner,
-              { backgroundColor: colors.card, borderColor: colors.border },
+        {/* Live score banner — pinned at top */}
+        <View
+          style={[
+            styles.scoreBanner,
+            { backgroundColor: colors.card, borderColor: colors.border },
+          ]}
+        >
+          <LinearGradient
+            colors={[
+              FEATURED_MATCH.homeColor + "55",
+              "transparent",
+              FEATURED_MATCH.awayColor + "55",
             ]}
-          >
-            <LinearGradient
-              colors={[...activeRoom.colors]}
-              style={styles.activeRoomStripe}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            />
-            <View style={styles.activeRoomContent}>
-              <View style={styles.activeRoomTop}>
-                <Text
-                  style={[
-                    styles.activeRoomCode,
-                    { color: colors.foreground },
-                  ]}
-                >
-                  {activeRoom.code}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          />
+          <View style={styles.scoreBannerInner}>
+            <View style={styles.scoreBannerTeam}>
+              <View
+                style={[
+                  styles.scoreBannerFlag,
+                  { backgroundColor: FEATURED_MATCH.homeColor },
+                ]}
+              >
+                <Text style={styles.scoreBannerFlagText}>
+                  {FEATURED_MATCH.home}
                 </Text>
-                {activeRoom.live && (
-                  <View
-                    style={[
-                      styles.liveBadge,
-                      { backgroundColor: colors.accent + "22" },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.liveDot,
-                        { backgroundColor: colors.accent },
-                      ]}
-                    />
-                    <Text
-                      style={[styles.liveText, { color: colors.accent }]}
-                    >
-                      LIVE
-                    </Text>
-                  </View>
-                )}
               </View>
               <Text
                 style={[
-                  styles.activeRoomMessage,
+                  styles.scoreBannerTeamName,
                   { color: colors.foreground },
                 ]}
-                numberOfLines={2}
               >
-                "{activeRoom.message}"
+                {FEATURED_MATCH.home}
+              </Text>
+            </View>
+            <View style={styles.scoreBannerCenter}>
+              <LiveBadge minute={FEATURED_MATCH.minute} />
+              <Text
+                style={[styles.scoreBannerScore, { color: colors.foreground }]}
+              >
+                {FEATURED_MATCH.homeScore} : {FEATURED_MATCH.awayScore}
               </Text>
               <Text
                 style={[
-                  styles.activeRoomOnline,
+                  styles.scoreBannerStage,
                   { color: colors.mutedForeground },
                 ]}
               >
-                {formatOnline(activeRoom.online)} supporters online
+                {FEATURED_MATCH.stage}
               </Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.mutedForeground}
-            />
-          </Pressable>
-        )}
+            <View style={[styles.scoreBannerTeam, { alignItems: "flex-end" }]}>
+              <View
+                style={[
+                  styles.scoreBannerFlag,
+                  { backgroundColor: FEATURED_MATCH.awayColor },
+                ]}
+              >
+                <Text style={styles.scoreBannerFlagText}>
+                  {FEATURED_MATCH.away}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.scoreBannerTeamName,
+                  { color: colors.foreground },
+                ]}
+              >
+                {FEATURED_MATCH.away}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-        <Text
-          style={[
-            styles.gridLabel,
-            { color: colors.mutedForeground, paddingHorizontal: 20 },
-          ]}
-        >
-          {activeRoom ? "ALL ROOMS" : "PICK YOUR NATION"}
-        </Text>
-
-        <View style={styles.grid}>
-          {ROOMS.map((room) => (
-            <RoomBubble
-              key={room.id}
-              room={room}
-              onPress={() => setActiveRoom(room)}
-            />
-          ))}
+        {/* Room list */}
+        <View style={styles.listSection}>
+          <Text
+            style={[styles.listLabel, { color: colors.mutedForeground }]}
+          >
+            ALL ROOMS
+          </Text>
+          <View style={styles.roomList}>
+            {ROOMS.map((room) => (
+              <RoomRow
+                key={room.id}
+                room={room}
+                active={activeRoomId === room.id}
+                onPress={() =>
+                  setActiveRoomId(
+                    activeRoomId === room.id ? null : room.id
+                  )
+                }
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -275,7 +345,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 16,
   },
   headerTitle: {
     fontFamily: "Inter_700Bold",
@@ -287,142 +357,130 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
-  activeRoomBanner: {
+  scoreBanner: {
     marginHorizontal: 20,
     borderRadius: 16,
     borderWidth: 1,
     overflow: "hidden",
+    marginBottom: 24,
+    padding: 16,
+  },
+  scoreBannerInner: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 24,
-    padding: 14,
+    justifyContent: "space-between",
+  },
+  scoreBannerTeam: {
+    alignItems: "flex-start",
+    gap: 6,
+    width: 60,
+  },
+  scoreBannerFlag: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scoreBannerFlagText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 9,
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+  scoreBannerTeamName: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 13,
+    letterSpacing: 0.5,
+  },
+  scoreBannerCenter: {
+    alignItems: "center",
+    gap: 4,
+    flex: 1,
+  },
+  scoreBannerScore: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 36,
+    letterSpacing: -1,
+  },
+  scoreBannerStage: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    letterSpacing: 0.3,
+  },
+  listSection: {
+    paddingHorizontal: 20,
+  },
+  listLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    letterSpacing: 1.5,
+    marginBottom: 14,
+  },
+  roomList: {
+    gap: 10,
+  },
+  roomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    overflow: "hidden",
+    paddingVertical: 12,
+    paddingRight: 14,
     gap: 12,
   },
-  activeRoomStripe: {
+  colorStrip: {
     width: 4,
-    height: "100%",
-    borderRadius: 2,
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
+    alignSelf: "stretch",
   },
-  activeRoomContent: {
-    flex: 1,
-    paddingLeft: 8,
-    gap: 4,
-  },
-  activeRoomTop: {
-    flexDirection: "row",
+  roomAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
     alignItems: "center",
-    gap: 8,
   },
-  activeRoomCode: {
+  roomAvatarText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 16,
+    fontSize: 11,
+    color: "#FFFFFF",
+    letterSpacing: 0.5,
   },
-  liveBadge: {
+  roomInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  roomInfoTop: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 7,
+    flexWrap: "wrap",
+  },
+  roomName: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
+  },
+  vibeBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
-  liveDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-  },
-  liveText: {
-    fontFamily: "Inter_700Bold",
+  vibeText: {
+    fontFamily: "Inter_600SemiBold",
     fontSize: 9,
     letterSpacing: 0.5,
   },
-  activeRoomMessage: {
+  roomMessage: {
     fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    lineHeight: 18,
-    fontStyle: "italic",
-  },
-  activeRoomOnline: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 11,
-  },
-  gridLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 1.5,
-    marginBottom: 16,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  bubbleWrapper: {
-    width: BUBBLE_SIZE,
-    height: BUBBLE_SIZE,
-  },
-  bubbleOuter: {
-    width: "100%",
-    height: "100%",
-    borderRadius: BUBBLE_SIZE / 2,
-    overflow: "hidden",
-  },
-  bubbleGradient: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bubbleInner: {
-    alignItems: "center",
-    gap: 4,
-  },
-  livePip: {
-    position: "absolute",
-    top: -BUBBLE_SIZE * 0.25,
-    right: -BUBBLE_SIZE * 0.1,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#FF4500",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  livePipDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#FFFFFF",
-  },
-  bubbleCode: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 32,
-    color: "#FFFFFF",
-    textShadowColor: "rgba(0,0,0,0.4)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-    letterSpacing: 1,
-  },
-  bubbleCountry: {
-    fontFamily: "Inter_500Medium",
     fontSize: 12,
-    color: "rgba(255,255,255,0.9)",
-    textShadowColor: "rgba(0,0,0,0.4)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    lineHeight: 16,
   },
-  bubbleOnlineRow: {
-    flexDirection: "row",
+  roomOnlineBlock: {
     alignItems: "center",
-    gap: 4,
-    marginTop: 2,
+    gap: 3,
   },
-  bubbleOnline: {
+  roomOnline: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
-    color: "rgba(255,255,255,0.8)",
   },
 });

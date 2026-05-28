@@ -20,12 +20,14 @@ import { useColors } from "@/hooks/useColors";
 import { LiveBadge } from "@/components/LiveBadge";
 
 const LIVE_MATCH = {
-  home: "BRA",
+  home: "MEX",
   away: "ARG",
   homeScore: 1,
-  awayScore: 0,
-  minute: 67,
+  awayScore: 1,
+  minute: 72,
   stage: "Quarter-Final",
+  homeColor: "#006847",
+  awayColor: "#4B9CD3",
 };
 
 interface Question {
@@ -41,10 +43,10 @@ const QUESTIONS: Question[] = [
     question: "Who scores next?",
     icon: "football",
     options: [
-      { id: "mbappe", label: "Mbappe" },
-      { id: "neymar", label: "Neymar Jr" },
+      { id: "lozano", label: "Lozano" },
       { id: "messi", label: "Messi" },
-      { id: "vinicius", label: "Vinicius Jr" },
+      { id: "jimenez", label: "Jiménez" },
+      { id: "dybala", label: "Dybala" },
     ],
   },
   {
@@ -52,10 +54,10 @@ const QUESTIONS: Question[] = [
     question: "Final score?",
     icon: "timer",
     options: [
-      { id: "2-0", label: "2 - 0" },
-      { id: "1-1", label: "1 - 1" },
-      { id: "2-1", label: "2 - 1" },
-      { id: "3-0", label: "3 - 0" },
+      { id: "1-1-et", label: "1-1 (ET)" },
+      { id: "2-1-mex", label: "2-1 MEX" },
+      { id: "1-2-arg", label: "1-2 ARG" },
+      { id: "pen", label: "Penalties" },
     ],
   },
   {
@@ -63,10 +65,10 @@ const QUESTIONS: Question[] = [
     question: "Match MVP?",
     icon: "star",
     options: [
-      { id: "mbappe", label: "Mbappe" },
-      { id: "vinicius", label: "Vinicius Jr" },
-      { id: "bellingham", label: "Bellingham" },
-      { id: "modric", label: "Modric" },
+      { id: "lozano", label: "Lozano" },
+      { id: "messi", label: "Messi" },
+      { id: "ochoa", label: "Ochoa" },
+      { id: "martinez", label: "Martinez" },
     ],
   },
   {
@@ -124,12 +126,9 @@ function OptionButton({
       >
         {selected && (
           <View
-            style={[
-              styles.optionCheck,
-              { backgroundColor: colors.primary },
-            ]}
+            style={[styles.optionCheck, { backgroundColor: colors.primary }]}
           >
-            <Ionicons name="checkmark" size={10} color="#000" />
+            <Ionicons name="checkmark" size={10} color={colors.primaryForeground} />
           </View>
         )}
         <Text
@@ -153,10 +152,9 @@ export default function PredictionsScreen() {
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
-
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [points, setPoints] = useState(0);
-  const [streak, setStreak] = useState(3);
+  const [points] = useState(420);
+  const [streak] = useState(3);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((data) => {
@@ -164,8 +162,6 @@ export default function PredictionsScreen() {
         try {
           const parsed = JSON.parse(data);
           setAnswers(parsed.answers ?? {});
-          setPoints(parsed.points ?? 0);
-          setStreak(parsed.streak ?? 3);
         } catch {}
       }
     });
@@ -174,10 +170,7 @@ export default function PredictionsScreen() {
   const select = async (questionId: string, optionId: string) => {
     const next = { ...answers, [questionId]: optionId };
     setAnswers(next);
-    await AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ answers: next, points, streak })
-    );
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: next }));
   };
 
   const answeredCount = Object.keys(answers).length;
@@ -188,19 +181,15 @@ export default function PredictionsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: isWeb ? 120 : 100 }}
       >
-        {/* Header */}
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <View>
             <Text style={[styles.headerTitle, { color: colors.foreground }]}>
               Predictions
             </Text>
-            <Text
-              style={[styles.headerSub, { color: colors.mutedForeground }]}
-            >
+            <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
               Stay in it all match long
             </Text>
           </View>
-          {/* Points + Streak */}
           <View style={styles.statsRow}>
             <View
               style={[
@@ -239,11 +228,27 @@ export default function PredictionsScreen() {
             <Text
               style={[styles.matchContextTeams, { color: colors.foreground }]}
             >
-              {LIVE_MATCH.home}{" "}
+              <Text
+                style={{
+                  color: LIVE_MATCH.homeColor,
+                  fontFamily: "Inter_700Bold",
+                }}
+              >
+                {LIVE_MATCH.home}
+              </Text>
+              {"  "}
               <Text style={{ color: colors.primary }}>
                 {LIVE_MATCH.homeScore} – {LIVE_MATCH.awayScore}
-              </Text>{" "}
-              {LIVE_MATCH.away}
+              </Text>
+              {"  "}
+              <Text
+                style={{
+                  color: LIVE_MATCH.awayColor,
+                  fontFamily: "Inter_700Bold",
+                }}
+              >
+                {LIVE_MATCH.away}
+              </Text>
             </Text>
             <Text
               style={[
@@ -264,12 +269,9 @@ export default function PredictionsScreen() {
           </Text>
         </View>
 
-        {/* Progress bar */}
+        {/* Progress */}
         <View
-          style={[
-            styles.progressBar,
-            { backgroundColor: colors.secondary },
-          ]}
+          style={[styles.progressBar, { backgroundColor: colors.secondary }]}
         >
           <View
             style={[
@@ -302,13 +304,12 @@ export default function PredictionsScreen() {
                 <Ionicons
                   name={q.icon as any}
                   size={18}
-                  color={answers[q.id] ? colors.primary : colors.mutedForeground}
+                  color={
+                    answers[q.id] ? colors.primary : colors.mutedForeground
+                  }
                 />
                 <Text
-                  style={[
-                    styles.questionText,
-                    { color: colors.foreground },
-                  ]}
+                  style={[styles.questionText, { color: colors.foreground }]}
                 >
                   {q.question}
                 </Text>
@@ -327,15 +328,21 @@ export default function PredictionsScreen() {
           ))}
         </View>
 
-        {/* Nudge */}
         {answeredCount === QUESTIONS.length && (
           <View
             style={[
               styles.allDoneCard,
-              { backgroundColor: colors.primary + "18", borderColor: colors.primary + "44" },
+              {
+                backgroundColor: colors.primary + "18",
+                borderColor: colors.primary + "44",
+              },
             ]}
           >
-            <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+            <Ionicons
+              name="checkmark-circle"
+              size={22}
+              color={colors.primary}
+            />
             <Text style={[styles.allDoneText, { color: colors.primary }]}>
               All predictions locked in. Good luck!
             </Text>
@@ -394,7 +401,7 @@ const styles = StyleSheet.create({
   },
   matchContextCenter: { flex: 1 },
   matchContextTeams: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Inter_500Medium",
     fontSize: 16,
   },
   matchContextStage: {
@@ -440,9 +447,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 10,
   },
-  optionPressable: {
-    width: "47%",
-  },
+  optionPressable: { width: "47%" },
   option: {
     borderRadius: 12,
     paddingVertical: 12,
@@ -460,10 +465,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  optionLabel: {
-    fontSize: 14,
-    letterSpacing: 0.1,
-  },
+  optionLabel: { fontSize: 14 },
   allDoneCard: {
     marginHorizontal: 20,
     marginTop: 20,

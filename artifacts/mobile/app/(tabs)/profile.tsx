@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { TEAM_THEMES, TeamCode, useTheme } from "@/contexts/ThemeContext";
 
 const ACHIEVEMENTS = [
   { id: "1", icon: "football", label: "First Goal", description: "Made your first prediction", unlocked: true },
@@ -23,38 +24,27 @@ const ACHIEVEMENTS = [
   { id: "6", icon: "ribbon", label: "Final Whistle", description: "Predict a perfect final score", unlocked: false },
 ];
 
-const FAVORITE_TEAM_COLORS = ["#009C3B", "#74ACDF", "#002395", "#AA151B", "#C8102E", "#006600"];
-const FAVORITE_TEAMS = ["BRA", "ARG", "FRA", "ESP", "ENG", "POR"];
+const ALL_TEAMS = Object.entries(TEAM_THEMES).map(([code, t]) => ({
+  code: code as TeamCode,
+  ...t,
+}));
 
-const PROFILE_KEY = "golpatron_profile";
+const STATS_KEY = "golpatron_stats";
 
 export default function ProfileScreen() {
   const colors = useColors();
+  const { teamCode, theme, setTeam } = useTheme();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
-
-  const [favoriteIdx, setFavoriteIdx] = useState(0);
   const [stats] = useState({ predictions: 14, correct: 9, streak: 3, points: 420 });
 
-  useEffect(() => {
-    AsyncStorage.getItem(PROFILE_KEY).then((data) => {
-      if (data) {
-        try {
-          const p = JSON.parse(data);
-          setFavoriteIdx(p.favoriteIdx ?? 0);
-        } catch {}
-      }
-    });
-  }, []);
-
-  const selectTeam = async (idx: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setFavoriteIdx(idx);
-    await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ favoriteIdx: idx }));
-  };
-
   const accuracy = Math.round((stats.correct / stats.predictions) * 100);
+
+  const handleSelectTeam = async (code: TeamCode) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await setTeam(code);
+  };
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -62,36 +52,28 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: isWeb ? 120 : 100 }}
       >
-        {/* Header gradient */}
+        {/* Header gradient using current team colors */}
         <LinearGradient
-          colors={[FAVORITE_TEAM_COLORS[favoriteIdx] + "55", colors.background]}
+          colors={[theme.gradientColors[0] + "66", colors.background]}
           style={[styles.heroGradient, { paddingTop: topPad + 16 }]}
         >
           <View style={styles.avatarWrapper}>
             <View
-              style={[
-                styles.avatar,
-                { backgroundColor: FAVORITE_TEAM_COLORS[favoriteIdx] },
-              ]}
+              style={[styles.avatar, { backgroundColor: theme.teamColor }]}
             >
-              <Text style={styles.avatarLetter}>
-                {FAVORITE_TEAMS[favoriteIdx][0]}
-              </Text>
+              <Text style={styles.avatarLetter}>{teamCode[0]}</Text>
             </View>
             <View
-              style={[
-                styles.avatarBadge,
-                { backgroundColor: colors.primary },
-              ]}
+              style={[styles.avatarBadge, { backgroundColor: colors.primary }]}
             >
-              <Ionicons name="checkmark" size={10} color="#000" />
+              <Ionicons name="checkmark" size={10} color={theme.primaryForeground} />
             </View>
           </View>
           <Text style={[styles.username, { color: colors.foreground }]}>
             FootballFan
           </Text>
           <Text style={[styles.userSince, { color: colors.mutedForeground }]}>
-            Mundial 2026 • Fan since day 1
+            Mundial 2026 · {theme.name} supporter
           </Text>
         </LinearGradient>
 
@@ -110,21 +92,12 @@ export default function ProfileScreen() {
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <Ionicons
-                name={s.icon as any}
-                size={18}
-                color={colors.primary}
-              />
-              <Text
-                style={[styles.statCardVal, { color: colors.foreground }]}
-              >
+              <Ionicons name={s.icon as any} size={18} color={colors.primary} />
+              <Text style={[styles.statCardVal, { color: colors.foreground }]}>
                 {s.value}
               </Text>
               <Text
-                style={[
-                  styles.statCardLabel,
-                  { color: colors.mutedForeground },
-                ]}
+                style={[styles.statCardLabel, { color: colors.mutedForeground }]}
               >
                 {s.label}
               </Text>
@@ -132,7 +105,7 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        {/* Streak bar */}
+        {/* Streak */}
         <View
           style={[
             styles.streakCard,
@@ -146,10 +119,7 @@ export default function ProfileScreen() {
                 {stats.streak}-prediction streak
               </Text>
               <Text
-                style={[
-                  styles.streakSub,
-                  { color: colors.mutedForeground },
-                ]}
+                style={[styles.streakSub, { color: colors.mutedForeground }]}
               >
                 Keep it up — top 15% this week
               </Text>
@@ -171,61 +141,70 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Favorite team */}
+        {/* Team theme picker */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { color: colors.mutedForeground }]}
-          >
-            YOUR NATION
+          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
+            YOUR NATION · CHANGES APP THEME
           </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.teamRow}
-          >
-            {FAVORITE_TEAMS.map((t, idx) => {
-              const active = idx === favoriteIdx;
+          <View style={styles.teamGrid}>
+            {ALL_TEAMS.map((t) => {
+              const active = t.code === teamCode;
               return (
-                <Pressable key={t} onPress={() => selectTeam(idx)}>
+                <Pressable key={t.code} onPress={() => handleSelectTeam(t.code)}>
                   <View
                     style={[
-                      styles.teamChip,
+                      styles.teamCard,
                       {
+                        borderColor: active ? t.primary : colors.border,
+                        borderWidth: active ? 2 : 1,
                         backgroundColor: active
-                          ? FAVORITE_TEAM_COLORS[idx]
+                          ? t.primary + "22"
                           : colors.card,
-                        borderColor: active
-                          ? FAVORITE_TEAM_COLORS[idx]
-                          : colors.border,
-                        borderWidth: 1,
                       },
                     ]}
                   >
+                    <LinearGradient
+                      colors={t.gradientColors}
+                      style={styles.teamCardFlag}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <Text style={styles.teamCardCode}>{t.code}</Text>
+                    </LinearGradient>
                     <Text
                       style={[
-                        styles.teamChipText,
+                        styles.teamCardName,
                         {
-                          color: active ? "#FFF" : colors.mutedForeground,
+                          color: active ? colors.primary : colors.mutedForeground,
                           fontFamily: active
                             ? "Inter_700Bold"
-                            : "Inter_500Medium",
+                            : "Inter_400Regular",
                         },
                       ]}
+                      numberOfLines={1}
                     >
-                      {t}
+                      {t.name}
                     </Text>
+                    {active && (
+                      <View
+                        style={[
+                          styles.activeCheck,
+                          { backgroundColor: t.primary },
+                        ]}
+                      >
+                        <Ionicons name="checkmark" size={9} color="#FFF" />
+                      </View>
+                    )}
                   </View>
                 </Pressable>
               );
             })}
-          </ScrollView>
+          </View>
         </View>
 
         {/* Achievements */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { color: colors.mutedForeground }]}
-          >
+          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
             ACHIEVEMENTS
           </Text>
           <View style={styles.achievementsGrid}>
@@ -240,7 +219,7 @@ export default function ProfileScreen() {
                       ? colors.primary + "44"
                       : colors.border,
                     borderWidth: 1,
-                    opacity: a.unlocked ? 1 : 0.45,
+                    opacity: a.unlocked ? 1 : 0.4,
                   },
                 ]}
               >
@@ -261,10 +240,7 @@ export default function ProfileScreen() {
                   />
                 </View>
                 <Text
-                  style={[
-                    styles.achievementLabel,
-                    { color: colors.foreground },
-                  ]}
+                  style={[styles.achievementLabel, { color: colors.foreground }]}
                   numberOfLines={1}
                 >
                   {a.label}
@@ -400,18 +376,46 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     marginBottom: 14,
   },
-  teamRow: {
+  teamGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
-    paddingRight: 20,
   },
-  teamChip: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 20,
+  teamCard: {
+    width: 80,
+    borderRadius: 12,
+    padding: 10,
+    alignItems: "center",
+    gap: 6,
+    position: "relative",
   },
-  teamChipText: {
-    fontSize: 13,
+  teamCardFlag: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  teamCardCode: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 11,
+    color: "#FFFFFF",
     letterSpacing: 0.5,
+  },
+  teamCardName: {
+    fontSize: 10,
+    letterSpacing: 0.2,
+    textAlign: "center",
+  },
+  activeCheck: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   achievementsGrid: {
     flexDirection: "row",
