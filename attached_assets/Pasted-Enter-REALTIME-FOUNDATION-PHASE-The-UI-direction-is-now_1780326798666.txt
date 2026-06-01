@@ -1,0 +1,150 @@
+Enter REALTIME FOUNDATION PHASE.
+
+The UI direction is now correct.
+
+Focus on infrastructure, realtime engagement, and room optimization.
+
+Do NOT add new tabs.
+
+Do NOT add analytics dashboards.
+
+======================================
+
+1. FIREBASE AUTHENTICATION
+   ======================================
+
+Implement Firebase Authentication.
+
+Support:
+
+* Google Sign-In
+* Email Sign-In (optional)
+
+First login flow:
+
+1. Welcome
+2. Choose Nation
+3. Enable Notifications
+4. Enter Lounge
+
+Store:
+
+uid
+displayName
+country
+xp
+streak
+predictionAccuracy
+isPro
+createdAt
+
+======================================
+2. FIRESTORE DATABASE
+=====================
+
+Create collections:
+
+users
+rooms
+messages
+predictions
+leaderboards
+matches
+notifications
+
+Use Firestore as the single realtime source of truth.
+
+======================================
+3. REALTIME ROOMS
+=================
+
+Use Firestore onSnapshot listeners.
+
+Realtime updates for:
+
+* messages
+* active users
+* reactions
+* polls
+* momentum
+* votes
+
+The app should feel live without manual refreshes.
+
+======================================
+4. ROOM BUBBLE REDESIGN
+=======================
+
+Current room bubbles are too large.
+
+Reduce size by approximately 25-35%.
+
+Replace text-only circles with:
+
+* country flags
+* nation name
+* active supporter count
+
+Example:
+
+🇲🇽
+
+Mexico
+
+🔥 2.1k active
+
+12.4k fans
+
+Use a responsive 3-column grid.
+
+Allow more countries visible without scrolling.
+
+======================================
+5. ROOM ACTIVITY SIGNALS
+========================
+
+Every room should show:
+
+* active supporters
+* live indicator
+* supporter count
+
+Examples:
+
+🟢 LIVE
+
+🔥 2.1k active
+
+12.4k fans
+
+This creates urgency and social proof.
+
+======================================
+6. REALTIME PRESENCE
+====================
+
+Track users online per room.
+
+Display:
+
+2,147 online
+
+Update in realtime.
+
+Presence should update automatically when users join or leave rooms.
+
+======================================
+7. IMPORTANT PRODUCT RULE
+=========================
+
+Focus on:
+
+* realtime experience
+* community
+* engagement
+* Firebase integration
+* launch readiness
+
+Do NOT add more major features.
+
+Build a stable Mundial social experience.
