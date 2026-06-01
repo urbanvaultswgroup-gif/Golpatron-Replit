@@ -36,7 +36,7 @@ interface Question {
   id: string;
   question: string;
   icon: string;
-  options: { id: string; label: string }[];
+  options: { id: string; label: string; pct: number }[];
   xp: number;
 }
 
@@ -48,10 +48,10 @@ function buildQuestions(home: string, away: string): Question[] {
       icon: "football",
       xp: 100,
       options: [
-        { id: "home_star", label: `${home} #10` },
-        { id: "away_star", label: `${away} #10` },
-        { id: "home_sub", label: `${home} sub` },
-        { id: "away_sub", label: `${away} sub` },
+        { id: "home_star", label: `${home} #10`, pct: 34 },
+        { id: "away_star", label: `${away} #10`, pct: 41 },
+        { id: "home_sub", label: `${home} sub`, pct: 14 },
+        { id: "away_sub", label: `${away} sub`, pct: 11 },
       ],
     },
     {
@@ -60,10 +60,10 @@ function buildQuestions(home: string, away: string): Question[] {
       icon: "timer",
       xp: 150,
       options: [
-        { id: "home_win_90", label: `${home} wins` },
-        { id: "away_win_90", label: `${away} wins` },
-        { id: "draw_et", label: "Draw → ET" },
-        { id: "penalties", label: "Penalties" },
+        { id: "home_win_90", label: `${home} wins`, pct: 38 },
+        { id: "away_win_90", label: `${away} wins`, pct: 29 },
+        { id: "draw_et", label: "Draw \u2192 ET", pct: 20 },
+        { id: "penalties", label: "Penalties", pct: 13 },
       ],
     },
     {
@@ -72,10 +72,10 @@ function buildQuestions(home: string, away: string): Question[] {
       icon: "star",
       xp: 75,
       options: [
-        { id: "home_gk", label: `${home} GK` },
-        { id: "home_10", label: `${home} #10` },
-        { id: "away_10", label: `${away} #10` },
-        { id: "away_9", label: `${away} #9` },
+        { id: "home_gk", label: `${home} GK`, pct: 12 },
+        { id: "home_10", label: `${home} #10`, pct: 54 },
+        { id: "away_10", label: `${away} #10`, pct: 27 },
+        { id: "away_9", label: `${away} #9`, pct: 7 },
       ],
     },
     {
@@ -84,10 +84,10 @@ function buildQuestions(home: string, away: string): Question[] {
       icon: "card",
       xp: 75,
       options: [
-        { id: "lt10", label: "< 10 min" },
-        { id: "bt1020", label: "10–20 min" },
-        { id: "gt20", label: "20+ min" },
-        { id: "none", label: "None" },
+        { id: "lt10", label: "< 10 min", pct: 22 },
+        { id: "bt1020", label: "10\u201320 min", pct: 35 },
+        { id: "gt20", label: "20+ min", pct: 29 },
+        { id: "none", label: "None", pct: 14 },
       ],
     },
   ];
@@ -127,11 +127,13 @@ function OptionBtn({
   label,
   selected,
   locked,
+  pct,
   onPress,
 }: {
   label: string;
   selected: boolean;
   locked: boolean;
+  pct: number;
   onPress: () => void;
 }) {
   const colors = useColors();
@@ -160,18 +162,31 @@ function OptionBtn({
           },
         ]}
       >
-        {selected && (
-          <View style={[styles.check, { backgroundColor: colors.primary }]}>
-            <Ionicons name="checkmark" size={9} color={colors.primaryForeground} />
-          </View>
-        )}
-        <Text
-          style={[
-            styles.optionLabel,
-            { color: selected ? colors.primary : colors.foreground, fontFamily: selected ? "Inter_600SemiBold" : "Inter_400Regular" },
-          ]}
-        >
-          {label}
+        <View style={styles.optionTop}>
+          {selected && (
+            <View style={[styles.check, { backgroundColor: colors.primary }]}>
+              <Ionicons name="checkmark" size={9} color={colors.primaryForeground} />
+            </View>
+          )}
+          <Text
+            style={[
+              styles.optionLabel,
+              { color: selected ? colors.primary : colors.foreground, fontFamily: selected ? "Inter_600SemiBold" : "Inter_400Regular" },
+            ]}
+          >
+            {label}
+          </Text>
+        </View>
+        <View style={[styles.pctTrack, { backgroundColor: colors.border }]}>
+          <View
+            style={[
+              styles.pctFill,
+              { width: `${pct}%` as any, backgroundColor: selected ? colors.primary : colors.mutedForeground + "55" },
+            ]}
+          />
+        </View>
+        <Text style={[styles.pctText, { color: selected ? colors.primary : colors.mutedForeground }]}>
+          {pct}% of fans
         </Text>
       </Animated.View>
     </Pressable>
@@ -337,6 +352,7 @@ export default function PredictionsScreen() {
                       label={opt.label}
                       selected={answers[q.id] === opt.id}
                       locked={answered && answers[q.id] !== opt.id}
+                      pct={opt.pct}
                       onPress={() => select(q.id, opt.id, q.xp)}
                     />
                   ))}
@@ -409,9 +425,13 @@ const styles = StyleSheet.create({
   xpFlash: { fontFamily: "Inter_700Bold", fontSize: 16 },
   optionsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   optionPressable: { width: "47%" },
-  option: { borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 6, minHeight: 48 },
+  option: { borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, gap: 8 },
+  optionTop: { flexDirection: "row", alignItems: "center", gap: 6 },
   check: { width: 16, height: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  optionLabel: { fontSize: 13 },
+  optionLabel: { flex: 1, fontSize: 13 },
+  pctTrack: { height: 3, borderRadius: 2, overflow: "hidden" },
+  pctFill: { height: 3, borderRadius: 2 },
+  pctText: { fontFamily: "Inter_500Medium", fontSize: 10 },
   lockedCard: { marginHorizontal: 20, marginTop: 20, borderRadius: 14, borderWidth: 1, padding: 16, flexDirection: "row", alignItems: "center", gap: 12 },
   lockedTitle: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
   lockedSub: { fontFamily: "Inter_400Regular", fontSize: 12, marginTop: 2 },

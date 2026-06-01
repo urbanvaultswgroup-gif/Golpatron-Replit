@@ -1,0 +1,419 @@
+WORLD CUP MVP POLISH & LAUNCH REFINEMENT
+
+IMPORTANT:
+
+Do NOT redesign the app.
+
+Do NOT add new tabs.
+
+Do NOT introduce dashboard-style complexity.
+
+The current direction is correct.
+
+GolPatrón is now a:
+PREMIUM WORLD CUP SOCIAL COMPANION APP.
+
+The goal is refinement, engagement, retention, and launch readiness.
+
+==================================================
+OVERALL PRODUCT DIRECTION
+=========================
+
+The current structure is correct:
+
+1. Home
+2. Rooms
+3. Predictions
+4. Rankings
+5. Profile
+
+Keep this navigation.
+
+Focus on polish and engagement.
+
+The app should feel like:
+
+* Apple Sports
+* OneFootball
+* FotMob
+* Discord football communities
+
+Combined into a simple Mundial companion.
+
+==================================================
+HOME SCREEN IMPROVEMENTS
+========================
+
+Current home screen is strong but needs optimization.
+
+Reduce hero match height by approximately 20-25%.
+
+Keep:
+
+* large score
+* live minute
+* match importance
+
+Reduce:
+
+* oversized stadium image
+* excessive vertical space
+
+Goal:
+
+Show more content above the fold.
+
+Users should immediately see:
+
+* hero match
+* live ribbon
+* flash news
+
+without excessive scrolling.
+
+==================================================
+LIVE MATCH RIBBON
+=================
+
+Keep horizontal scrolling.
+
+Improve:
+
+* smoother snap scrolling
+* clearer live indicators
+* team flags or logos
+* active match pulse
+
+Avoid:
+cluttered cards.
+
+Cards should remain compact.
+
+==================================================
+FLASH NEWS
+==========
+
+Current direction is excellent.
+
+Expand slightly.
+
+Add:
+
+* goal alerts
+* injury alerts
+* VAR alerts
+* lineup updates
+* knockout updates
+
+Keep cards compact.
+
+Avoid large news articles.
+
+The experience should feel:
+fast and scannable.
+
+==================================================
+ROOMS (MOST IMPORTANT FEATURE)
+==============================
+
+Rooms are now the primary retention engine.
+
+The room bubbles are excellent.
+
+Maintain:
+
+* large country circles
+* nation identity
+* visual simplicity
+
+==================================================
+ADD ROOM ACTIVITY SIGNALS
+=========================
+
+Each room should display:
+
+* active supporters online
+* reactions per minute
+* live status
+
+Example:
+
+MEX
+12.4k fans
+🔥 2.1k active
+
+ARG
+9.1k fans
+⚽ 840 active
+
+This immediately communicates energy.
+
+==================================================
+INSIDE ROOMS
+============
+
+Create cleaner room experiences.
+
+Add:
+
+Trending Right Now section.
+
+Examples:
+
+🔥 Goal reaction
+😡 VAR controversy
+🗳 MVP voting
+⚽ Next scorer poll
+
+This creates engagement without chat spam.
+
+==================================================
+ANTI-SPAM DESIGN
+================
+
+Do NOT allow rooms to become:
+
+* WhatsApp groups
+* TikTok comment walls
+
+Use:
+
+* compact messages
+* grouped reactions
+* highlighted comments
+* room momentum indicators
+
+Quality over quantity.
+
+==================================================
+PREDICTIONS (RETENTION ENGINE)
+==============================
+
+Predictions are the strongest engagement feature.
+
+Maintain:
+
+* next scorer
+* match MVP
+* next booking
+* final result
+* penalties
+* possession winner
+
+==================================================
+ADD SOCIAL PROOF
+================
+
+Every prediction option should show community percentages.
+
+Examples:
+
+68% chose ARG #10
+
+42% predict penalties
+
+54% predict Mexico win
+
+This dramatically increases engagement.
+
+==================================================
+PREDICTION REWARDS
+==================
+
+Connect predictions to progression.
+
+Examples:
+
+Correct prediction:
+
++50 XP
++1 streak
++rank increase
+
+Users should feel immediate reward.
+
+==================================================
+LIVE MATCH EVENTS
+=================
+
+When a predicted event occurs:
+
+Example:
+
+User predicted:
+Mbappe scores next
+
+Mbappe scores
+
+Immediately show:
+
++50 XP
+🔥 Correct Prediction
+⬆ Rank Up
+
+Create dopamine moments.
+
+==================================================
+LEADERBOARD IMPROVEMENTS
+========================
+
+Current leaderboard is good.
+
+Add:
+
+* movement indicators
+* rank changes
+* streak indicators
+* country badges
+
+Examples:
+
+▲ +12 positions
+🔥 4-match streak
+
+Make rankings feel alive.
+
+==================================================
+RANKINGS SCREEN
+===============
+
+Current rankings need improvement.
+
+Replace generic initials.
+
+Use:
+
+* player photos
+  OR
+* player photos + flags
+
+Examples:
+
+Mbappe photo
+Messi photo
+Ronaldo photo
+
+The rankings should feel premium.
+
+==================================================
+PROFILE SCREEN
+==============
+
+Current profile direction is strong.
+
+Keep:
+
+* team theme selection
+* XP
+* streaks
+* achievements
+
+==================================================
+ADD PROFILE SHARING
+===================
+
+Allow users to share:
+
+* XP
+* prediction accuracy
+* nation support
+* leaderboard rank
+
+Create shareable football identity.
+
+==================================================
+REMOVE DEMO VISIBILITY
+======================
+
+Do NOT show DEMO badges.
+
+Users lose trust immediately.
+
+Instead:
+
+Show:
+LIVE
+
+or nothing.
+
+Fallback systems should remain invisible.
+
+==================================================
+PUSH NOTIFICATIONS
+==================
+
+Implement Firebase Cloud Messaging.
+
+Notifications:
+
+⚽ Goal scored
+🔥 Prediction resolved
+🗳 New MVP vote
+🏆 Knockout starting
+💬 Room activity surge
+
+Notifications should feel exciting.
+
+Never spam users.
+
+==================================================
+ONBOARDING
+==========
+
+First launch should ask:
+
+1. Choose Nation
+2. Enable Notifications
+3. Join Nation Room
+
+This immediately creates identity.
+
+==================================================
+PERFORMANCE
+===========
+
+Maintain:
+
+* fast startup
+* smooth scrolling
+* lightweight rendering
+* optimized API requests
+
+Focus on mobile responsiveness.
+
+==================================================
+IMPORTANT PRODUCT RULE
+======================
+
+Do NOT add more tabs.
+
+Do NOT add tactical dashboards.
+
+Do NOT add analytics consoles.
+
+Do NOT add scout systems.
+
+The product is now focused.
+
+Stay focused.
+
+==================================================
+FINAL PRODUCT GOAL
+==================
+
+GolPatrón should launch as a premium World Cup social companion where fans:
+
+* follow live matches
+* join nation communities
+* make live predictions
+* earn XP
+* climb rankings
+* celebrate football together
+
+The experience should feel:
+
+simple,
+fast,
+social,
+immersive,
+and addictive.

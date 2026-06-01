@@ -28,14 +28,14 @@ const BUBBLE_GAP = 14;
 const BUBBLE_SIZE = (SCREEN_WIDTH - 20 * 2 - BUBBLE_GAP) / 2;
 
 const ROOMS = [
-  { id: "1", country: "Mexico", code: "MEX", color: "#006847", color2: "#CE1126", online: 12443, live: true, vibe: "ELECTRIC", message: "GOOOAL! Chucky equalizes — el tri is ALIVE!" },
-  { id: "2", country: "Argentina", code: "ARG", color: "#4B9CD3", color2: "#74B2E0", online: 9104, live: true, vibe: "HYPE", message: "Messi playing out of his mind, this man is built different" },
-  { id: "3", country: "France", code: "FRA", color: "#0055A4", color2: "#ED2939", online: 6208, live: true, vibe: "DOMINANT", message: "Mbappe hat-trick incoming?? This man is unstoppable" },
-  { id: "4", country: "Brazil", code: "BRA", color: "#009C3B", color2: "#FEDF00", online: 7843, live: false, vibe: "READY", message: "Next match in 1h 48m – canarinho já ta preparado" },
-  { id: "5", country: "England", code: "ENG", color: "#CF091D", color2: "#00247D", online: 4904, live: true, vibe: "TENSE", message: "Kane needs one more to equal the all-time record" },
-  { id: "6", country: "Spain", code: "ESP", color: "#C60B1E", color2: "#F1BF00", online: 5182, live: true, vibe: "SMOOTH", message: "Pedri absolutely controlling midfield — poetry" },
-  { id: "7", country: "Portugal", code: "POR", color: "#006600", color2: "#FF0000", online: 3671, live: false, vibe: "DEBATE", message: "Ronaldo dropped from starting XI — massive news" },
-  { id: "8", country: "Germany", code: "GER", color: "#DD0000", color2: "#FFCE00", online: 2887, live: true, vibe: "PRECISE", message: "Tactical masterclass from Nagelsmann — total football" },
+  { id: "1", country: "Mexico", code: "MEX", color: "#006847", color2: "#CE1126", online: 12443, active: 2100, reactionsPerMin: 340, live: true, vibe: "ELECTRIC", message: "GOOOAL! Chucky equalizes — el tri is ALIVE!" },
+  { id: "2", country: "Argentina", code: "ARG", color: "#4B9CD3", color2: "#74B2E0", online: 9104, active: 840, reactionsPerMin: 210, live: true, vibe: "HYPE", message: "Messi playing out of his mind, this man is built different" },
+  { id: "3", country: "France", code: "FRA", color: "#0055A4", color2: "#ED2939", online: 6208, active: 590, reactionsPerMin: 155, live: true, vibe: "DOMINANT", message: "Mbappe hat-trick incoming?? This man is unstoppable" },
+  { id: "4", country: "Brazil", code: "BRA", color: "#009C3B", color2: "#FEDF00", online: 7843, active: 310, reactionsPerMin: 47, live: false, vibe: "READY", message: "Next match in 1h 48m – canarinho já ta preparado" },
+  { id: "5", country: "England", code: "ENG", color: "#CF091D", color2: "#00247D", online: 4904, active: 420, reactionsPerMin: 98, live: true, vibe: "TENSE", message: "Kane needs one more to equal the all-time record" },
+  { id: "6", country: "Spain", code: "ESP", color: "#C60B1E", color2: "#F1BF00", online: 5182, active: 510, reactionsPerMin: 120, live: true, vibe: "SMOOTH", message: "Pedri absolutely controlling midfield — poetry" },
+  { id: "7", country: "Portugal", code: "POR", color: "#006600", color2: "#FF0000", online: 3671, active: 180, reactionsPerMin: 22, live: false, vibe: "DEBATE", message: "Ronaldo dropped from starting XI — massive news" },
+  { id: "8", country: "Germany", code: "GER", color: "#DD0000", color2: "#FFCE00", online: 2887, active: 270, reactionsPerMin: 61, live: true, vibe: "PRECISE", message: "Tactical masterclass from Nagelsmann — total football" },
 ];
 
 const REACTIONS = [
@@ -130,6 +130,10 @@ function RoomBubble({
           )}
           <Text style={styles.bubbleCode}>{room.code}</Text>
           <Text style={styles.bubbleOnline}>{formatOnline(room.online)}</Text>
+          <View style={styles.bubbleActiveRow}>
+            <Ionicons name="flame" size={9} color="rgba(255,255,255,0.7)" />
+            <Text style={styles.bubbleActive}>{formatOnline(room.active)} active</Text>
+          </View>
         </LinearGradient>
       </Animated.View>
 
@@ -362,6 +366,8 @@ const styles = StyleSheet.create({
   liveDotInner: { width: 8, height: 8, borderRadius: 4 },
   bubbleCode: { fontFamily: "Inter_700Bold", fontSize: BUBBLE_SIZE * 0.19, color: "#FFFFFF", letterSpacing: 1.5, textShadowColor: "rgba(0,0,0,0.4)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   bubbleOnline: { fontFamily: "Inter_500Medium", fontSize: BUBBLE_SIZE * 0.1, color: "rgba(255,255,255,0.75)", marginTop: 4 },
+  bubbleActiveRow: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 2 },
+  bubbleActive: { fontFamily: "Inter_500Medium", fontSize: BUBBLE_SIZE * 0.08, color: "rgba(255,255,255,0.6)" },
   bubbleCountry: { fontFamily: "Inter_600SemiBold", fontSize: 14, marginTop: 12, textAlign: "center" },
   vibePill: { marginTop: 5, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   vibeLabel: { fontFamily: "Inter_700Bold", fontSize: 9, letterSpacing: 0.8 },

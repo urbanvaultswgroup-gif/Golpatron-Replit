@@ -41,6 +41,19 @@ function getInitial(name: string): string {
   return parts[parts.length - 1]?.[0] ?? name[0] ?? "?";
 }
 
+const RANK_CHANGES: Record<string, number> = {
+  "Kylian Mbappe": 0,
+  "Lionel Messi": 2,
+  "Cristiano Ronaldo": -1,
+  "Vinicius Jr": 3,
+  "Harry Kane": 0,
+  "Alvaro Morata": 1,
+  "Chucky Lozano": 5,
+  "Jude Bellingham": -2,
+  "Antoine Griezmann": 1,
+  "Lautaro Martinez": 0,
+};
+
 export default function RankingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -139,15 +152,22 @@ export default function RankingsScreen() {
         <View style={styles.list}>
           {rest.map((p, idx) => {
             const rankColor = getRankColor(p.rank, colors);
-            const initial = getInitial(p.name);
+            const change = RANK_CHANGES[p.name] ?? 0;
             return (
               <View
                 key={p.name + idx}
                 style={[styles.listRow, { borderBottomColor: colors.border, borderBottomWidth: idx < rest.length - 1 ? 1 : 0 }]}
               >
-                <Text style={[styles.listRank, { color: rankColor, width: 28 }]}>{p.rank}</Text>
+                <View style={styles.rankNumWrap}>
+                  <Text style={[styles.listRank, { color: rankColor }]}>{p.rank}</Text>
+                  {change !== 0 && (
+                    <Text style={[styles.rankChange, { color: change > 0 ? "#34D399" : "#F87171" }]}>
+                      {change > 0 ? "\u25b2" : "\u25bc"}{Math.abs(change)}
+                    </Text>
+                  )}
+                </View>
                 <View style={[styles.listAvatar, { backgroundColor: p.teamColor }]}>
-                  <Text style={styles.listAvatarLetter}>{initial}</Text>
+                  <Text style={styles.listAvatarLetter}>{p.country}</Text>
                 </View>
                 <View style={styles.listInfo}>
                   <Text style={[styles.listName, { color: colors.foreground }]}>{p.name}</Text>
@@ -193,9 +213,11 @@ const styles = StyleSheet.create({
   podiumRank: { fontFamily: "Inter_700Bold", fontSize: 20 },
   list: { paddingHorizontal: 20 },
   listRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14, gap: 12 },
+  rankNumWrap: { width: 30, alignItems: "center", gap: 2 },
+  rankChange: { fontFamily: "Inter_600SemiBold", fontSize: 8 },
   listRank: { fontFamily: "Inter_700Bold", fontSize: 14 },
-  listAvatar: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
-  listAvatarLetter: { fontFamily: "Inter_700Bold", fontSize: 14, color: "#FFFFFF" },
+  listAvatar: { width: 38, height: 38, borderRadius: 19, justifyContent: "center", alignItems: "center" },
+  listAvatarLetter: { fontFamily: "Inter_700Bold", fontSize: 9, color: "#FFFFFF", letterSpacing: 0.3 },
   listInfo: { flex: 1 },
   listName: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
   listCountry: { fontFamily: "Inter_400Regular", fontSize: 11, marginTop: 1 },

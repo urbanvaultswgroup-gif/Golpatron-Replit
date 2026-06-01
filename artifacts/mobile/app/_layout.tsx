@@ -9,12 +9,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -39,12 +41,24 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  useEffect(() => {
+    AsyncStorage.getItem("golpatron_onboarded").then((val) => {
+      if (!val) setShowOnboarding(true);
+    });
+  }, []);
+
+  const handleOnboardingComplete = async () => {
+    await AsyncStorage.setItem("golpatron_onboarded", "1");
+    setShowOnboarding(false);
+  };
 
   if (!fontsLoaded && !fontError) return null;
 
@@ -56,6 +70,10 @@ export default function RootLayout() {
             <GestureHandlerRootView style={{ flex: 1 }}>
               <KeyboardProvider>
                 <RootLayoutNav />
+                <OnboardingModal
+                  visible={showOnboarding}
+                  onComplete={handleOnboardingComplete}
+                />
               </KeyboardProvider>
             </GestureHandlerRootView>
           </QueryClientProvider>

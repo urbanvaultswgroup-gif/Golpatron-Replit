@@ -156,11 +156,6 @@ export default function HomeScreen() {
                 <Text style={[styles.heroStage, { color: colors.mutedForeground }]}>
                   {selectedMatch.stage}
                 </Text>
-                {!isLive && (
-                  <View style={[styles.demoBadge, { backgroundColor: colors.secondary }]}>
-                    <Text style={[styles.demoText, { color: colors.mutedForeground }]}>DEMO</Text>
-                  </View>
-                )}
               </View>
               <View style={styles.scoreRow}>
                 <View style={styles.teamBlock}>
@@ -187,7 +182,7 @@ export default function HomeScreen() {
         {matches.length > 0 && (
           <View style={styles.section}>
             <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>LIVE NOW</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.ribbonContent}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.ribbonContent} snapToInterval={152} decelerationRate="fast">
               {matches.map((m) => {
                 const isSelected = selectedMatch?.id === m.id;
                 return (
@@ -334,7 +329,7 @@ const styles = StyleSheet.create({
   liveCountDot: { width: 6, height: 6, borderRadius: 3 },
   liveCountText: { fontFamily: "Inter_600SemiBold", fontSize: 11, letterSpacing: 0.5 },
   iconBtn: { padding: 4 },
-  heroContainer: { width: "100%", height: 240, position: "relative", overflow: "hidden" },
+  heroContainer: { width: "100%", height: 190, position: "relative", overflow: "hidden" },
   heroImage: { width: "100%", height: "100%" },
   heroAccents: { ...StyleSheet.absoluteFillObject, flexDirection: "row" },
   heroAccentLeft: { flex: 1 },
